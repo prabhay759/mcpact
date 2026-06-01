@@ -1,0 +1,85 @@
+{
+  "consumer": {
+    "name": "weather-agent"
+  },
+  "provider": {
+    "name": "weather-server"
+  },
+  "interactions": [
+    {
+      "description": "get current weather in London (celsius)",
+      "providerState": "weather data available for London",
+      "request": {
+        "tool": "get_current_weather",
+        "arguments": {
+          "city": "London",
+          "units": "celsius"
+        }
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "mcpact:matcher": "regex",
+              "pattern": "temperature \\d+°C",
+              "value": "Current weather in London: partly cloudy, temperature 18°C, humidity 72%",
+              "sample": "Current weather in London: partly cloudy, temperature 18°C, humidity 72%"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "get current weather in Paris (celsius)",
+      "providerState": "weather data available for Paris",
+      "request": {
+        "tool": "get_current_weather",
+        "arguments": {
+          "city": "Paris",
+          "units": "celsius"
+        }
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "mcpact:matcher": "include",
+              "value": "temperature",
+              "sample": "temperature"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "get 3-day forecast for London",
+      "providerState": "weather data available for London",
+      "request": {
+        "tool": "get_forecast",
+        "arguments": {
+          "city": "London",
+          "days": 3
+        }
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "mcpact:matcher": "regex",
+              "pattern": "3-day forecast for London",
+              "value": "3-day forecast for London:\nDay 1: partly cloudy, 17°C\nDay 2: partly cloudy, 19°C\nDay 3: partly cloudy, 18°C",
+              "sample": "3-day forecast for London:\nDay 1: partly cloudy, 17°C\nDay 2: partly cloudy, 19°C\nDay 3: partly cloudy, 18°C"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "mcpactVersion": "1.0.0",
+    "createdAt": "2026-06-01T04:28:33.257Z"
+  }
+}
