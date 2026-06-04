@@ -1,8 +1,12 @@
 # mcpact
 
-Consumer-driven contract testing for MCP (Model Context Protocol) servers.
+Consumer-driven contract testing for MCP (Model Context Protocol) servers. Think Pact, but for tool calls.
 
-Inspired by Pact for REST/gRPC, mcpact lets agents record the contracts they expect from MCP servers and verifies those contracts are still honored on every deploy. When a server silently renames a tool, changes a schema, or breaks a response shape, the contract test catches it before the agent does.
+When an agent depends on an MCP server's tools, a silent rename, schema change, or broken response shape fails the agent at runtime. mcpact catches these regressions before they reach production: the agent team writes a contract describing exactly what they expect, and the server team runs the verifier on every deploy to prove the contract is still satisfied.
+
+```bash
+npm install mcpact
+```
 
 ---
 
@@ -11,14 +15,16 @@ Inspired by Pact for REST/gRPC, mcpact lets agents record the contracts they exp
 ```
 Consumer (agent)                          Provider (MCP server)
 ─────────────────                         ─────────────────────
-1. Declare interactions                   3. Load pact files written
-   using the DSL                             by consumer tests
+1. Declare expected interactions          3. Load pact files written
+   using the fluent DSL                      by the consumer tests
 
-2. Test agent code against                4. Replay interactions against
-   in-memory mock server      ──pacts──▶     the real server process
-   → write pact JSON                      5. Verify responses match
+2. Test agent code against                4. Replay every interaction
+   in-memory mock server      ──pacts──▶     against the real process
+   → writes pact JSON                     5. Verify responses match
                                              declared expectations
 ```
+
+Both sides are decoupled — the consumer team never needs a running server to write tests, and the provider team runs verification independently on their own schedule.
 
 ---
 
@@ -227,10 +233,13 @@ npm run test:examples
 
 ---
 
-## Installation
+## Architecture
 
-```bash
-npm install mcpact
-```
-
-Requires `@modelcontextprotocol/sdk` as a peer dependency (already a dependency of most MCP projects).
+| File | Role |
+|------|------|
+| `src/consumer/dsl.ts` | `Mcpact` class — fluent builder + `buildMockClient()` using `InMemoryTransport` |
+| `src/consumer/recorder.ts` | `McpRecorder` — wraps a live `Client` to bootstrap contracts from real calls |
+| `src/provider/verifier.ts` | `McpVerifier` — spawns the server as a stdio subprocess, replays contracts |
+| `src/matchers.ts` | All matchers + `getSample()` (extracts concrete values for mock responses) |
+| `src/schema-validator.ts` | Detects missing tools, added required fields, type changes |
+| `src/cli.ts` | `mcpact verify` CLI |
